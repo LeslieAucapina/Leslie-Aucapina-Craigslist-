@@ -1,0 +1,52 @@
+CREATE SCHEMA IF NOT EXISTS "craigs_jobs";
+
+CREATE  TABLE "craigs_jobs".dim_datetime ( 
+	"month"              integer    ,
+	weekofyear           integer    ,
+	hour_number          integer    ,
+	monthname            varchar(100)    ,
+	data_original_format varchar(100)    ,
+	date_iso_format      date    ,
+	dateid               integer  NOT NULL  ,
+	"year"               integer    ,
+	daynumber            integer    ,
+	weekofmonth          integer    ,
+	dayname              varchar(100)    ,
+	CONSTRAINT pk_dim_datetime PRIMARY KEY ( dateid )
+ );
+
+CREATE  TABLE "craigs_jobs".dim_job ( 
+	title                varchar    ,
+	job_title            varchar    ,
+	employment_type      varchar    ,
+	compensation_type    varchar    ,
+	link                 varchar    ,
+	job_id               integer  NOT NULL  ,
+	CONSTRAINT pk_title UNIQUE ( title ) ,
+	CONSTRAINT pk_dim_job PRIMARY KEY ( job_id )
+ );
+
+CREATE  TABLE "craigs_jobs".dim_location ( 
+	"location"           varchar    ,
+	latitude             decimal(30,12)    ,
+	longitude            decimal(30,12)    ,
+	locationid           integer  NOT NULL  ,
+	CONSTRAINT pk_dim_location PRIMARY KEY ( locationid )
+ );
+
+CREATE  TABLE "craigs_jobs".fact_post ( 
+	post_id              bigint  NOT NULL  ,
+	price                decimal(5,2)    ,
+	locationid           integer  NOT NULL  ,
+	dateid               integer    ,
+	job_id               integer  NOT NULL  ,
+	CONSTRAINT pk_fact_post_ PRIMARY KEY ( post_id, locationid, job_id )
+ );
+
+COMMENT ON COLUMN "craigs_jobs".dim_datetime.date_iso_format IS 'year, month, date, minute, second';
+
+COMMENT ON COLUMN "craigs_jobs".dim_job.title IS 'Expanded title of job posted and additional details about the job';
+
+COMMENT ON COLUMN "craigs_jobs".dim_job.compensation_type IS 'Ranges in salary and/or dependent on experience';
+
+COMMENT ON COLUMN "craigs_jobs".dim_location."location" IS 'Neighborhood in Long Island where the job is';
