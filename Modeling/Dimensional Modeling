@@ -1,0 +1,5 @@
+fact: PostID, Price
+Fact_Post: PostID, price, link
+Dim_Location: Lagitude (Location),Latitude (Location), Location (location) 
+Dim_Job: Job title, title, Emplyment Type, compensation
+Dim DateTime 
