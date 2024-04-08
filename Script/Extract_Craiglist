@@ -1,0 +1,116 @@
+!pip3 install azure-storage-blob
+!pip3 install pyarrow #Apache Arrow#Import Libraries 
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import warnings
+warnings.filterwarnings('ignore')
+
+from io import StringIO
+import numpy as np
+import pandas as pd
+import json
+import requests 
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+
+!pip install beautifulsoup4 requests lxml
+
+headers = {
+    'Host': 'newyork.craigslist.org',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Cookie': 'cl_tocmode=jjj%3Apic; cl_b=4|0d789d0bf0f7b02eee1318429c3e52e7ab3db2af|1712113328cENrg',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+}
+
+
+df = pd.DataFrame(columns=['Post ID','Data Latitude', 'Data Longitude', 'Datetime',
+                           'Compensation', 'Employment Type', 'Job Title',
+                           'Title', 'Link', 'Price', 'Location'])
+
+for i in range(0, 3):  # This will iterate i from 1 to 10
+    url = f'https://newyork.craigslist.org/search/lgi/jjj#search=1~thumb~{i}~0'
+    print(url)
+    response = requests.get(url, headers=headers)
+    print(len(response.text))
+    html_soup = BeautifulSoup(response.text, 'html.parser')
+    posts = html_soup.find_all('li', class_='cl-static-search-result')
+
+    print(f'Number of posts found: {len(posts)}')
+    for post in posts:
+        # Extract the title from the 'title' attribute of the <li> tag
+        title = post['title']
+
+        # Extract the href attribute from the <a> tag
+        href = post.a['href']
+        post_id = href.split('/')[-1].split('.html')[0]
+        # Fetch the content of the href URL
+        response = requests.get(href)
+        html_content = response.text
+
+        # Parse the fetched HTML content
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        # Extract data-latitude and data-longitude from the <div id="map"> element
+        map_div = soup.find('div', id='map')
+        data_latitude = map_div['data-latitude'] if map_div and 'data-latitude' in map_div.attrs else 'N/A'
+        data_longitude = map_div['data-longitude'] if map_div and 'data-longitude' in map_div.attrs else 'N/A'
+
+        # Extract datetime from the <time class="date timeago"> element
+        time_tag = soup.find('time', class_='date timeago')
+        datetime = time_tag['datetime'] if time_tag and 'datetime' in time_tag.attrs else 'N/A'
+
+        attrgroup = soup.find('div', class_='attrgroup')
+
+        # Initialize an empty dictionary to store the labels and values
+        attributes = {}
+
+        if attrgroup:
+          # Loop through each 'div' with class 'attr' within the 'attrgroup' div
+          for attr in attrgroup.find_all('div', class_='attr'):
+            # Extract the label and value
+            labl = attr.find('span', class_='labl').text.strip(':')
+            valu = attr.find('span', class_='valu').text.strip()
+            # Add them to the dictionary
+            attributes[labl] = valu
+
+
+        # Extract the price from the <div> tag with the class "price"
+        # Using `.find()` method and checking if the element exists to avoid errors
+        price_div = post.find('div', class_='price')
+        price = price_div.text.strip() if price_div else 'N/A'
+
+        # Extract the location from the <div> tag with the class "location"
+        # Similar check as for price to handle missing elements gracefully
+        location_div = post.find('div', class_='location')
+        location = location_div.text.strip() if location_div else 'N/A'
+
+         # Append the data to the DataFrame
+        df = df.append({'Post ID': post_id, 'Data Latitude': data_latitude,
+                        'Data Longitude': data_longitude, 'Datetime': datetime,
+                        'Compensation': attributes.get('compensation', 'N/A'),
+                        'Employment Type': attributes.get('employment type', 'N/A'),
+                        'Job Title': attributes.get('job title', 'N/A'),
+                        'Title': title, 'Link': href, 'Price': price, 'Location': location}, ignore_index=True)
+        
+#Specify the path to your JSON configuration file 
+config_file_path = 'config.json'
+
+#Load the JSON configurationfile 
+with openconfig_file_path, 'r') as config_file["connectionString"]
+CONTAINER_AZURE = "craigslist-webscrape"
+blob_name = "Craigslist_Jobs_LI"
+
+# Convert DataFrame to CSV 
+output = StringIO()
+df.to_csv(output, index = False)
+data = output.getvalue()
+output.close()
