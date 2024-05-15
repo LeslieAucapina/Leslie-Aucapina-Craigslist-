@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="Craigslist_LI_Job_Modeling" id="LogicalDesign-1e76" database="LogicalDesign" >
+	<schema name="INSTANCE" catalogname="Craigslist_LI_Job_Modeling" >
+		<table name="dim_datetime" prior="dim_date" >
+			<column name="month" prior="Month" type="DATE" jt="91" />
+			<column name="date" prior="Day" type="DATE" jt="91" >
+				<comment><![CDATA[day of the month]]></comment>
+			</column>
+			<column name="hour" prior="Year" type="DATETIME" jt="93" />
+			<column name="year" type="DATE" jt="91" />
+			<column name="minute" type="DATETIME" jt="93" />
+			<column name="second" type="DATETIME" jt="93" />
+		</table>
+		<table name="dim_job" prior="Entity" >
+			<column name="title" type="VARCHAR" jt="12" >
+				<comment><![CDATA[Expanded title of job posted and additional details about the job]]></comment>
+			</column>
+			<column name="job_title" type="VARCHAR" jt="12" />
+			<column name="employment_type" type="VARCHAR" jt="12" />
+			<column name="Compensation_Type" prior="Compensation" type="VARCHAR" jt="12" >
+				<comment><![CDATA[Ranges in salary and/or dependent on experience]]></comment>
+			</column>
+			<index name="pk_title" unique="UNIQUE_KEY" >
+				<column name="title" />
+			</index>
+		</table>
+		<table name="dim_location" prior="Entity" >
+			<column name="location" type="VARCHAR" jt="12" >
+				<comment><![CDATA[Neighborhood in Long Island where the job is]]></comment>
+			</column>
+			<column name="latitude" type="DECIMAL" length="0" decimal="2" jt="3" />
+			<column name="Longitude" type="DECIMAL" length="0" decimal="2" jt="3" />
+		</table>
+		<table name="fact_Post" prior="fact_Post " >
+			<column name="post_id" type="BIGINT" jt="-5" mandatory="y" />
+			<column name="link" type="VARCHAR" jt="12" />
+			<column name="price" type="DECIMAL" length="0" decimal="2" jt="3" />
+			<index name="pk_fact_Post " unique="PRIMARY_KEY" >
+				<column name="post_id" />
+			</index>
+			<fk name="fk_fact_Post_dim_job" virtual="y" to_schema="Craigslist_LI_Job_Modeling.INSTANCE" to_table="dim_job" type="NonIdentifying" mandatory="y" cardinality="OneMore" range_from="0" range_to="0" >
+				<fk_column name="post_id" pk="title" />
+			</fk>
+		</table>
+	</schema>
+	<layout name="Default Layout" id="Layout-1725" show_relation="columns" >
+		<entity schema="Craigslist_LI_Job_Modeling.INSTANCE" name="dim_datetime" color="C1D8EE" x="480" y="288" />
+		<entity schema="Craigslist_LI_Job_Modeling.INSTANCE" name="dim_job" color="C1D8EE" x="48" y="272" />
+		<entity schema="Craigslist_LI_Job_Modeling.INSTANCE" name="dim_location" color="C1D8EE" x="368" y="192" />
+		<entity schema="Craigslist_LI_Job_Modeling.INSTANCE" name="fact_Post" color="3986C1" x="288" y="272" />
+		<callout x="64" y="48" pointer="Round" >
+			<comment><![CDATA[This is a layout - a diagram with tools.
+- Create new entities by right-clicking the layout. 
+- Double-click entity headers to edit.
+- For a better understanding of the schema, create multiple layouts.
+- Deploy the model into the database by converting it first to the physical design.]]></comment>
+		</callout>
+	</layout>
+</project>
