@@ -1,3 +1,4 @@
 The data comes from webscraping the url 'https://newyork.craigslist.org/search/lgi/jjj#search=1~thumb~{i}~0'
 The data shows job listings in the Long Island, New York area for the month on March 2024
 The data was sourced and stored April 7, 2024 thus showing listings in the previous month until March 7, 2024
+It has been stored in an Azure Container
