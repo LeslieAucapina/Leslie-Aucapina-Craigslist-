@@ -1,0 +1,56 @@
+CREATE SCHEMA IF NOT EXISTS "craigs_jobs";
+
+CREATE  TABLE "craigs_jobs".dim_datetime ( 
+	dateid               integer  NOT NULL  ,
+	date_iso_format      date    ,
+	"year"               integer    ,
+	"month"              integer    ,
+	day_number           integer    ,
+	hour_number          integer    ,
+	month_name           varchar(100)    ,
+	day_name             varchar(100)    ,
+	week_of_year         integer    ,
+	week_of_month        integer    ,
+	CONSTRAINT pk_dim_datetime PRIMARY KEY ( dateid )
+ );
+
+CREATE  TABLE "craigs_jobs".dim_employment_type ( 
+	employment_typeid    integer  NOT NULL  ,
+	employment_type      varchar    ,
+	CONSTRAINT pk_dim_employment_type PRIMARY KEY ( employment_typeid )
+ );
+
+CREATE  TABLE "craigs_jobs".dim_job ( 
+	jobid                integer  NOT NULL  ,
+	job_title            varchar    ,
+	title                varchar    ,
+	compensation         varchar    ,
+	link                 varchar    ,
+	CONSTRAINT pk_title UNIQUE ( title ) ,
+	CONSTRAINT pk_dim_job PRIMARY KEY ( jobid )
+ );
+
+CREATE  TABLE "craigs_jobs".dim_location ( 
+	locationid           integer  NOT NULL  ,
+	"location"           varchar    ,
+	longitude            decimal(30,12)     ,
+	latitude             decimal(30,12)     ,
+	CONSTRAINT pk_dim_location PRIMARY KEY ( locationid )
+ );
+
+CREATE  TABLE "craigs_jobs".fact_post ( 
+	postid               bigint  NOT NULL  ,
+	locationid           integer  NOT NULL  ,
+	dateid               integer  NOT NULL  ,
+	jobid                integer  NOT NULL  ,
+	employment_typeid    integer  NOT NULL  ,
+	CONSTRAINT pk_fact_post_ PRIMARY KEY ( postid, locationid, jobid, employment_typeid, dateid )
+ );
+
+COMMENT ON COLUMN "craigs_jobs".dim_datetime.date_iso_format IS 'year, month, date, minute, second';
+
+COMMENT ON COLUMN "craigs_jobs".dim_job.title IS 'Expanded title of job posted and additional details about the job';
+
+COMMENT ON COLUMN "craigs_jobs".dim_job.compensation IS 'Ranges in salary and/or dependent on experience';
+
+COMMENT ON COLUMN "craigs_jobs".dim_location."location" IS 'Neighborhood in Long Island where the job is';
